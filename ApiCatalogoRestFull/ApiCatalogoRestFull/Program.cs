@@ -1,6 +1,11 @@
 using ApiCatalogoRestFull.Context;
 using ApiCatalogoRestFull.Models;
+using ApiCatalogoRestFull.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,14 +16,54 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<CatalogoContext>(opt => opt.UseSqlServer("Data Source=DESKTOP-AKJOSMO;Initial Catalog=CatalogoDeRoupasDB;Integrated Security=true;"));
 
+builder.Services.AddSingleton<ITokenService>(new TokenService());
+
+builder.Services.AddAuthentication
+                 (JwtBearerDefaults.AuthenticationScheme)
+                 .AddJwtBearer(options =>
+                 {
+                     options.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidateIssuer = true,
+                         ValidateAudience = true,
+                         ValidateLifetime = true,
+                         ValidateIssuerSigningKey = true,
+
+                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                         ValidAudience = builder.Configuration["Jwt:Audience"],
+                         IssuerSigningKey = new SymmetricSecurityKey
+                         (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                     };
+                 });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+//endpoint para login
+app.MapPost("/login", [AllowAnonymous] (UserModel userModel, ITokenService tokenService) =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    if (userModel == null)
+    {
+        return Results.BadRequest("Login Inválido");
+    }
+    if (userModel.UserName == "admin" && userModel.Password == "admin")
+    {
+        var tokenString = tokenService.GerarToken(app.Configuration["Jwt:Key"],
+            app.Configuration["Jwt:Issuer"],
+            app.Configuration["Jwt:Audience"],
+            userModel);
+        return Results.Ok(new { token = tokenString });
+    }
+    else
+    {
+        return Results.BadRequest("Login Inválido");
+    }
+}).Produces(StatusCodes.Status400BadRequest)
+              .Produces(StatusCodes.Status200OK)
+              .WithName("Login")
+              .WithTags("Autenticacao");
+
 
 app.UseHttpsRedirection();
 
@@ -27,7 +72,7 @@ app.MapGet("/categorias", async (CatalogoContext context) =>
     var categoria = await context.Categorias.AsNoTracking().ToListAsync();
 
     return Results.Ok(categoria);
-});
+}).RequireAuthorization();
 
 app.MapGet("/categorias/{id:int}", async (int id, CatalogoContext context) =>
 {
@@ -147,6 +192,17 @@ app.MapDelete("/produtos/{id:int}", async (int id, CatalogoContext context) =>
 
     return Results.NotFound();
 });
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
 

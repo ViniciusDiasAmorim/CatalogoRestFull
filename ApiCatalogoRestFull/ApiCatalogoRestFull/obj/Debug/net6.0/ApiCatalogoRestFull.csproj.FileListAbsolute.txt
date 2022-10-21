@@ -60,3 +60,4 @@ C:\Users\User\Desktop\Programação\0.0 Portfolio\CatalogoRestFull\ApiCatalogoRe
 C:\Users\User\Desktop\Programação\0.0 Portfolio\CatalogoRestFull\ApiCatalogoRestFull\ApiCatalogoRestFull\obj\Debug\net6.0\ApiCatalogoRestFull.pdb
 C:\Users\User\Desktop\Programação\0.0 Portfolio\CatalogoRestFull\ApiCatalogoRestFull\ApiCatalogoRestFull\obj\Debug\net6.0\ApiCatalogoRestFull.genruntimeconfig.cache
 C:\Users\User\Desktop\Programação\0.0 Portfolio\CatalogoRestFull\ApiCatalogoRestFull\ApiCatalogoRestFull\obj\Debug\net6.0\ref\ApiCatalogoRestFull.dll
+C:\Users\User\Desktop\Programação\0.0 Portfolio\CatalogoRestFull\ApiCatalogoRestFull\ApiCatalogoRestFull\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
