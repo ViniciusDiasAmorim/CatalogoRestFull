@@ -18,6 +18,7 @@ builder.Services.AddDbContext<CatalogoContext>(opt => opt.UseSqlServer("Data Sou
 
 builder.Services.AddSingleton<ITokenService>(new TokenService());
 
+#region Autenticacao
 builder.Services.AddAuthentication
                  (JwtBearerDefaults.AuthenticationScheme)
                  .AddJwtBearer(options =>
@@ -37,10 +38,11 @@ builder.Services.AddAuthentication
                  });
 
 builder.Services.AddAuthorization();
+#endregion
 
 var app = builder.Build();
 
-//endpoint para login
+#region Login
 app.MapPost("/login", [AllowAnonymous] (UserModel userModel, ITokenService tokenService) =>
 {
     if (userModel == null)
@@ -64,9 +66,11 @@ app.MapPost("/login", [AllowAnonymous] (UserModel userModel, ITokenService token
               .WithName("Login")
               .WithTags("Autenticacao");
 
+#endregion
 
 app.UseHttpsRedirection();
 
+#region categorias Endpoints
 app.MapGet("/categorias", async (CatalogoContext context) =>
 {
     var categoria = await context.Categorias.AsNoTracking().ToListAsync();
@@ -131,7 +135,9 @@ app.MapDelete("/categorias/{id:int}", async (int id, CatalogoContext context) =>
     return Results.NotFound();
 
 });
+#endregion
 
+#region produtos Endpoints
 app.MapGet("/produtos", async (CatalogoContext context) =>
 {
     return await context.Produtos.AsNoTracking().ToListAsync();
@@ -192,6 +198,7 @@ app.MapDelete("/produtos/{id:int}", async (int id, CatalogoContext context) =>
 
     return Results.NotFound();
 });
+#endregion
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -205,4 +212,3 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.Run();
-
