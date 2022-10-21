@@ -1,4 +1,6 @@
-﻿namespace ApiCatalogoRestFull.Models
+﻿using System.Text.Json.Serialization;
+
+namespace ApiCatalogoRestFull.Models
 {
     public class Produto
     {
@@ -10,6 +12,7 @@
         public DateTime DataCompra { get; set; }
         public int Estoque { get; set; }
         public int CategoriaId { get; set; }
+        [JsonIgnore]
         public virtual Categoria Categoria { get; set; }
     }
 }
