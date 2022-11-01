@@ -107,32 +107,32 @@ app.MapPut("/categorias/{id:int}", async (int id, Categoria novaCategoria, Catal
 
     var categoria = await context.Categorias.FindAsync(id);
 
-    if (categoria != null)
+    if (categoria is null)
     {
-        categoria.Nome = novaCategoria.Nome;
-        categoria.Descricao = novaCategoria.Descricao;
-
-        await context.SaveChangesAsync();
-
-        return Results.Ok(categoria);
+        return Results.NotFound();
     }
 
-    return Results.NotFound();
+    categoria.Nome = novaCategoria.Nome;
+    categoria.Descricao = novaCategoria.Descricao;
+
+    await context.SaveChangesAsync();
+
+    return Results.Ok(categoria);
 });
 
 app.MapDelete("/categorias/{id:int}", async (int id, CatalogoContext context) =>
 {
     var categoria = await context.Categorias.FindAsync(id);
 
-    if (categoria != null)
+    if (categoria is null)
     {
-        context.Remove(categoria);
-        await context.SaveChangesAsync();
-
-        return Results.NoContent();
+        return Results.NotFound();
     }
 
-    return Results.NotFound();
+    context.Remove(categoria);
+    await context.SaveChangesAsync();
+
+    return Results.NoContent();
 
 });
 #endregion
@@ -142,25 +142,29 @@ app.MapGet("/produtos", async (CatalogoContext context) =>
 {
     return await context.Produtos.AsNoTracking().ToListAsync();
 });
+
 app.MapGet("/produtos/{id:int}", async (int id, CatalogoContext context) =>
 {
     var produto = await context.Produtos.FindAsync(id);
-    if (produto != null)
+
+    if (produto is null)
     {
-        return Results.Ok(produto);
+        return Results.NotFound();
     }
 
-    return Results.NotFound();
+    return Results.Ok(produto);
 });
+
 app.MapPost("/produtos", async (Produto produto, CatalogoContext context) =>
 {
     context.Produtos.Add(produto);
+
     await context.SaveChangesAsync();
 
     return Results.Created($"/produtos/{produto.ProdutoId}", produto);
 });
 
-app.MapPut("/produtos", async (int id, Produto novoProduto, CatalogoContext context) =>
+app.MapPut("/produtos/{id}", async (int id, Produto novoProduto, CatalogoContext context) =>
 {
     if (id != novoProduto.ProdutoId)
     {
@@ -169,35 +173,40 @@ app.MapPut("/produtos", async (int id, Produto novoProduto, CatalogoContext cont
 
     var produto = await context.Produtos.FindAsync(id);
 
-    if (produto != null)
+    if (produto is null)
     {
-        produto.Nome = novoProduto.Nome;
-        produto.Imagem = novoProduto.Imagem;
-        produto.Descricao = novoProduto.Descricao;
-        produto.Preco = novoProduto.Preco;
-        produto.DataCompra = novoProduto.DataCompra;
-        produto.Estoque = novoProduto.Estoque;
-        produto.CategoriaId = novoProduto.CategoriaId;
-
-        await context.SaveChangesAsync();
-        return Results.Ok(produto);
+        return Results.NotFound();
     }
 
-    return Results.NotFound();
+    produto.Nome = novoProduto.Nome;
+    produto.Imagem = novoProduto.Imagem;
+    produto.Descricao = novoProduto.Descricao;
+    produto.Preco = novoProduto.Preco;
+    produto.DataCompra = novoProduto.DataCompra;
+    produto.Estoque = novoProduto.Estoque;
+    produto.CategoriaId = novoProduto.CategoriaId;
+
+    await context.SaveChangesAsync();
+    return Results.Ok(produto);
 });
+
 app.MapDelete("/produtos/{id:int}", async (int id, CatalogoContext context) =>
 {
     var produto = await context.Produtos.FindAsync(id);
-    if (produto != null)
-    {
-        context.Remove(produto);
-        await context.SaveChangesAsync();
 
-      return  Results.NoContent();
+    if (produto is null)
+    {
+        return Results.NotFound();
+
     }
 
-    return Results.NotFound();
+    context.Remove(produto);
+
+    await context.SaveChangesAsync();
+
+    return Results.NoContent();
 });
+
 #endregion
 
 // Configure the HTTP request pipeline.
