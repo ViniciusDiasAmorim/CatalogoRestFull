@@ -5,7 +5,7 @@ Uma API de catálogo restful para gerenciamento de produtos e categorias.
 ## Tecnologias utilizadas
 - ASP.NET Core
 - Entity Framework Core
-- SQL Server
+- MySQL
 - JWT (JSON Web Token)
 
 ## Funcionalidades
